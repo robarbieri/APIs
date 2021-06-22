@@ -1,0 +1,225 @@
+{
+	"info": {
+		"_postman_id": "ac54b420-88a1-4fd3-ba5a-e8098e93af4f",
+		"name": "Resseguro",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "Contabiliza PMD - Provisão",
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{token}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"type": "text",
+						"value": "application/json"
+					},
+					{
+						"key": "X-Company-Id",
+						"value": "1",
+						"type": "text"
+					},
+					{
+						"key": "X-Application-Id",
+						"value": "2",
+						"type": "text"
+					},
+					{
+						"key": "X-User-Id",
+						"value": "\"icatu\"",
+						"type": "text"
+					},
+					{
+						"key": "X-Trace-Id",
+						"value": "\"4\"",
+						"type": "text"
+					}
+				],
+				"url": {
+					"raw": "http://localhost:8080/?key=AIzaSyBGu7Cn_B9UzGfSAYcZXlp2eQsn88GBI9c",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						""
+					],
+					"query": [
+						{
+							"key": "key",
+							"value": "AIzaSyBGu7Cn_B9UzGfSAYcZXlp2eQsn88GBI9c"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "GET lista PMDS",
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{token}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "GET",
+				"header": [
+					{
+						"key": "Content-Type",
+						"type": "text",
+						"value": "application/json"
+					},
+					{
+						"key": "X-Company-Id",
+						"value": "1",
+						"type": "text"
+					},
+					{
+						"key": "X-Application-Id",
+						"value": "2",
+						"type": "text"
+					},
+					{
+						"key": "X-User-Id",
+						"value": "\"icatu\"",
+						"type": "text"
+					},
+					{
+						"key": "X-Trace-Id",
+						"value": "\"4\"",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"xYear\": 2020,\r\n    \"xMonth\": 6,\r\n    \"xLastMonth\": 5\r\n}"
+				},
+				"url": {
+					"raw": "https://openapi-dev-internal.hdi.com.br/corporate/integration/v1/queryconnector?code=561&xYear=2020&xMonth=6",
+					"protocol": "https",
+					"host": [
+						"openapi-dev-internal",
+						"hdi",
+						"com",
+						"br"
+					],
+					"path": [
+						"corporate",
+						"integration",
+						"v1",
+						"queryconnector"
+					],
+					"query": [
+						{
+							"key": "code",
+							"value": "561"
+						},
+						{
+							"key": "xYear",
+							"value": "2020"
+						},
+						{
+							"key": "xMonth",
+							"value": "6"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "GET data referência",
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{token}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "GET",
+				"header": [
+					{
+						"key": "Content-Type",
+						"type": "text",
+						"value": "application/json"
+					},
+					{
+						"key": "X-Company-Id",
+						"type": "text",
+						"value": "1"
+					},
+					{
+						"key": "X-Application-Id",
+						"type": "text",
+						"value": "2"
+					},
+					{
+						"key": "X-User-Id",
+						"type": "text",
+						"value": "\"icatu\""
+					},
+					{
+						"key": "X-Trace-Id",
+						"type": "text",
+						"value": "\"4\""
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"xYear\": 2020,\r\n    \"xMonth\": 6,\r\n    \"xLastMonth\": 5\r\n}"
+				},
+				"url": {
+					"raw": "https://openapi-dev-internal.hdi.com.br/corporate/integration/v1/queryconnector?code=565",
+					"protocol": "https",
+					"host": [
+						"openapi-dev-internal",
+						"hdi",
+						"com",
+						"br"
+					],
+					"path": [
+						"corporate",
+						"integration",
+						"v1",
+						"queryconnector"
+					],
+					"query": [
+						{
+							"key": "code",
+							"value": "565"
+						}
+					]
+				}
+			},
+			"response": []
+		}
+	],
+	"protocolProfileBehavior": {}
+}

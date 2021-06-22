@@ -1,0 +1,22 @@
+apiVersion: networking.istio.io/v1alpha3
+kind: VirtualService
+metadata:
+  name: ins-cr-policy-accounting-vs
+spec:
+  gateways:
+    - cross-cluters-gateway
+    - cross-cluters-gateway-ilb
+  hosts:
+    - openapi-dev-internal.hdi.com.br
+    - openapi-dev.hdi.com.br
+  http:
+    - match:
+        - method:
+            exact: POST
+          uri:
+            exact: /scc/finance/v1/accountingEvents
+      route:
+        - destination:
+            host: ins-cr-policy-accounting-np
+            port:
+              number: 80

@@ -1,0 +1,297 @@
+swagger: '2.0'
+info:
+  description: Accounting
+  version: 1.0.0
+  title: Accounting
+host: api.ins-cr-policy-accounting-be.endpoints.ins-cross-clusters-dev.cloud.goog
+
+securityDefinitions:
+  api_key:
+    type: apiKey
+    name: key
+    in: query
+  oauth2_key:
+    authorizationUrl: ""
+    flow: implicit
+    type: oauth2   
+    x-google-issuer: hdi-corporate-auth@ins-cross-security-auth-dev.iam.gserviceaccount.com
+    x-google-jwks_uri: https://www.googleapis.com/robot/v1/metadata/x509/hdi-corporate-auth@ins-cross-security-auth-dev.iam.gserviceaccount.com
+    x-google-audiences: api.hdi.com.br
+security:
+  - api_key: []
+  - oauth2_key: []
+
+basePath: /scc/finance/v1
+tags:
+  - name: Accounting
+    description: Accounting
+schemes:
+  - https
+
+parameters:
+  skipParam:
+    in: query
+    name: skip
+    required: false
+    type: integer
+    minimum: 0
+    description: Number of start record.
+  limitParam:
+    in: query
+    name: limit
+    required: false
+    type: integer
+    minimum: 1
+    maximum: 100
+    default: 20
+    description: Quantity of records
+  fieldsFilterParam:
+    in: query
+    name: fieldsFilter
+    required: false
+    type: string
+    description: Fields list to return data 
+  companyIdHeaderParam:
+    in: header
+    name: X-Company-Id
+    required: true
+    type: string
+    description: Id of the Company that is using the API.     
+  applicationIdHeaderParam:
+    in: header
+    name: X-Application-Id
+    required: true
+    type: string
+    description: Id of the Application that is using the API.
+  userIdHeaderParam:
+    in: header
+    name: X-User-Id
+    required: true
+    type: string
+    description: Id of the User that is using the API.   
+  traceIdHeaderParam:
+    name: X-Trace-Id
+    in: header
+    description: Trace ID
+    required: false
+    type: string 
+  companyIdOpcional:
+    in: query
+    name: companyId
+    required: false
+    type: number
+    minimum: 0
+    description: the Insurance Company Id to target request
+  companyIdRequired:
+    in: query
+    name: companyId
+    required: true
+    type: number
+    minimum: 0
+    description: the Insurance Company Id to target request 
+
+responses:
+  200-Ok:
+    description: Ok
+  204-NoContent:
+    description: No content
+  400-BadRequest:
+    description: Bad request
+  401-Unauthorized:
+    description: Unauthorized
+    schema:
+      $ref: '#/definitions/ApiErrorResponse'
+  403-Forbidden:
+    description: Forbidden
+    schema:
+      $ref: '#/definitions/ApiErrorResponse'
+  404-DataNotFound:
+    description: Data not found
+    schema:
+      $ref: '#/definitions/ApiErrorResponse'
+  405-DataInvalid:
+    description: Data input not supplied or invalid
+    schema:
+      $ref: '#/definitions/ApiErrorResponse'
+  500-Exception:
+    description: Exception
+    schema:
+      $ref: '#/definitions/ApiErrorResponse'
+
+paths:
+  /accountingEvents:
+    post:
+      tags:
+        - dominio de negocio
+      summary: none
+      description: none
+      operationId: getEntidadesAdd
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      parameters:
+        - $ref: '#/parameters/companyIdHeaderParam'
+        - $ref: '#/parameters/applicationIdHeaderParam'
+        - $ref: '#/parameters/userIdHeaderParam'
+        - $ref: '#/parameters/traceIdHeaderParam'
+        - $ref: '#/parameters/companyIdRequired'
+        - in: body
+          name: ''
+          description: ''
+          required: true
+          schema:
+            $ref: '#/definitions/Entidade'
+      responses:
+        201:
+          description: Created
+        200:
+          description: Successful Request
+          schema:
+            $ref: '#/definitions/Entidade'
+        204:
+          $ref: '#/responses/204-NoContent'
+        400:
+          $ref: '#/responses/400-BadRequest'
+        401:
+          $ref: '#/responses/401-Unauthorized'
+        403:
+          $ref: '#/responses/403-Forbidden'
+        404:
+          $ref: '#/responses/404-DataNotFound'
+        405:
+          $ref: '#/responses/405-DataInvalid'
+        500:
+          $ref: '#/responses/500-Exception'
+    get:      
+      tags:
+        - dominio de negocio
+      summary: none
+      description: none
+      operationId: getEntidadesLisr
+      consumes: 
+        - '*'
+      produces: 
+        - application/json
+      parameters:
+        - $ref: '#/parameters/companyIdHeaderParam'
+        - $ref: '#/parameters/applicationIdHeaderParam'
+        - $ref: '#/parameters/userIdHeaderParam'
+        - $ref: '#/parameters/traceIdHeaderParam'
+        - $ref: '#/parameters/companyIdRequired'       
+        - $ref: '#/parameters/skipParam'
+        - $ref: '#/parameters/limitParam'
+        - $ref: '#/parameters/fieldsFilterParam'
+        - name: number
+          in: query
+          description: none
+          required: true
+          type: integer
+          format: int64      
+      responses:
+        200:
+          description: Successful Request
+          schema:
+            type: array
+            description: entidade
+            items:
+              $ref: '#/definitions/Entidade'
+        204:
+          $ref: '#/responses/204-NoContent'
+        400:
+          $ref: '#/responses/400-BadRequest'
+        401:
+          $ref: '#/responses/401-Unauthorized'
+        403:
+          $ref: '#/responses/403-Forbidden'
+        404:
+          $ref: '#/responses/404-DataNotFound'
+        405:
+          $ref: '#/responses/405-DataInvalid'
+        500:
+          $ref: '#/responses/500-Exception'
+  /entidades/{id}:
+    get:
+      tags:
+        - dominio de negocio
+      summary: none
+      description: none
+      operationId: getEntidadeDetails
+      consumes:
+        - '*'
+      produces:
+        - application/json
+      parameters:
+        - $ref: '#/parameters/companyIdHeaderParam'
+        - $ref: '#/parameters/applicationIdHeaderParam'
+        - $ref: '#/parameters/userIdHeaderParam'
+        - $ref: '#/parameters/traceIdHeaderParam'
+        - $ref: '#/parameters/companyIdRequired'
+        - name: id
+          in: path
+          description: none
+          required: true
+          type: integer
+          format: int64
+      responses:
+        200:
+          description: Successful Request
+          schema:
+            $ref: '#/definitions/Entidade'
+        204:
+          $ref: '#/responses/204-NoContent'
+        400:
+          $ref: '#/responses/400-BadRequest'
+        401:
+          $ref: '#/responses/401-Unauthorized'
+        403:
+          $ref: '#/responses/403-Forbidden'
+        404:
+          $ref: '#/responses/404-DataNotFound'
+        405:
+          $ref: '#/responses/405-DataInvalid'
+        500:
+          $ref: '#/responses/500-Exception'
+definitions:
+  ObjectError:
+    type: object
+    description: Error Enitity
+    properties:
+      code:
+        type: string
+        description: Id of the technical exception
+      message:
+        type: string
+        description: Technical message
+      nativeMessage:
+        type: string
+        description: Native error message
+      trackid:
+        type: string
+        description: Track id of transaction process
+  ApiErrorResponse:
+    type: object
+    description: Error API responses
+    properties:
+      code:
+        type: string
+        description: Internal error ID
+      message:
+        type: string
+        description: Basic message error
+      description:
+        type: string
+        description: Detailed error description
+      errors:
+        type: array
+        description: List of errors
+        items:
+          $ref: '#/definitions/ObjectError'
+  Entidade:
+    type: object
+    description: none
+    properties:
+      id:
+        type: number
+        format: int32
+        description: id

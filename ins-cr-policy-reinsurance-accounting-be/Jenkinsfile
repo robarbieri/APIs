@@ -1,0 +1,149 @@
+def google_credentials = '/jenkins-deploy-devl-infra-cross-fb6b2e645975.json'
+def google_project_vs='ins-cross-clusters-dev'
+def google_cluster_vs='k8s-ins-cross-sa-east1-dev'
+def google_cluster='k8s-ins-cross-sa-east1-dev'
+def google_project='ins-cross-clusters-dev'
+def google_region='southamerica-east1'
+def docker_image = 'gcr.io/infra-cross/ins-cr-policy-accounting-be'
+def docker_image_version = 'latest'
+def api_name = 'ins-cr-policy-accounting-be'
+def git_repo = 'http://hdixbbs1:7990/scm/hse/ins-cr-policy-accounting-be.git'
+
+node {
+    def mvnHome
+    stage('SCM Checkout') { // for display purposes
+        // Get some code from a GitHub repository
+
+        checkout([$class: 'GitSCM', branches: [
+                [name: '*/develop']
+            ],
+            doGenerateSubmoduleConfigurations: false, extensions: [], submoduleCfg: [],
+            userRemoteConfigs: [
+                [credentialsId: 'BITBUCKET_SRVACCOUNT',
+                    url: git_repo
+                ]
+            ]
+        ])
+
+        // Get the Maven tool
+        // ** NOTE: This 'M3' Maven tool must be configured
+
+        // **       in the global configuration.          
+        mvnHome = tool 'MAVEN 3.6.1'
+    }
+
+    stage(' Junit Tests') {
+        // Run the maven build
+        withEnv(["MVN_HOME=$mvnHome"]) {
+            if (isUnix()) {
+               // sh '"$MVN_HOME/bin/mvn" test'
+
+            } else {
+                bat(/"%MVN_HOME%\bin\mvn" test/)
+            }
+        }
+    }
+
+    stage('SonarQube analysis') {
+        //mvn sonar:sonar -Dsonar.host.url=http://localhost:9000 -Dsonar.login=the-generated-token
+
+        withEnv(["MVN_HOME=$mvnHome"]) {
+
+            if (isUnix()) {
+                sh '"$MVN_HOME/bin/mvn" org.sonarsource.scanner.maven:sonar-maven-plugin:3.2:sonar -Dsonar.host.url=http://10.7.0.175:9000/sonar -Dsonar.login=f26264175c77c4cbe3f2e8908a71be6f7a31a7e5'
+
+            } else {
+                bat(/"%MVN_HOME%\bin\mvn" sonar:sonar/)
+            }
+        }
+    }
+
+    stage('Maven Build') {
+        // Run the maven build
+        withEnv(["MVN_HOME=$mvnHome"]) {
+            if (isUnix()) {
+                sh '"$MVN_HOME/bin/mvn" -Dmaven.test.failure.ignore clean package'
+            } else {
+                bat(/"%MVN_HOME%\bin\mvn" -Dmaven.test.failure.ignore clean package/)
+            }
+        }
+    }
+
+
+    stage('Build Docker Image GCR') {
+        IMAGE = readMavenPom().getArtifactId()
+        pom = readMavenPom file: "pom.xml";
+        
+
+        withEnv(["MVN_HOME=$mvnHome"]) {
+            if (isUnix()) {
+                def customImage = docker.build(docker_image)
+                sh 'export DOCKER_HOST=tcp://127.0.0.1:2375'
+                env.GOOGLE_APPLICATION_CREDENTIALS = google_credentials
+                env.GOOGLE_PROJECT = google_project
+                env.GOOLE_REGION = google_region
+              	sh "gcloud auth activate-service-account --key-file=${GOOGLE_APPLICATION_CREDENTIALS}"
+          		sh "gcloud config set core/project ${GOOGLE_PROJECT}"
+          		sh "gcloud config set compute/region ${GOOLE_REGION}"
+              	sh "gcloud auth print-access-token | docker login -u oauth2accesstoken --password-stdin https://gcr.io"
+                customImage.push('build-' + env.BUILD_ID)
+                customImage.push(docker_image_version)
+            }
+        }
+    		
+	}
+	stage('Build Docker Container GKE') {
+        env.GOOGLE_APPLICATION_CREDENTIALS = google_credentials
+        env.GOOGLE_PROJECT = google_project
+        env.GOOGLE_CLUSTER = google_cluster
+        env.GOOLE_REGION = google_region
+        env.API_NAME = api_name
+        sh "gcloud beta container clusters get-credentials ${GOOGLE_CLUSTER} --region ${GOOLE_REGION} --project ${GOOGLE_PROJECT}"
+        sh "gcloud auth activate-service-account --key-file=${GOOGLE_APPLICATION_CREDENTIALS}"        
+        sh "gcloud config set compute/zone ${env.ZONE}"
+        sh "gcloud config set core/project ${GOOGLE_PROJECT}"
+        sh "gcloud config set compute/region ${GOOLE_REGION}"
+        if (fileExists('openapi.yaml')) {
+          sh "gcloud endpoints services deploy openapi.yaml"
+        }
+        if (fileExists('env.properties')) {
+          try {
+          	sh "kubectl delete configmap env-${API_NAME}"
+          } catch (e) {
+            currentBuild.result = "SUCCESS"
+          }
+          sh "kubectl create configmap env-${API_NAME} --from-env-file=env.properties"
+        }
+        if (fileExists('secret.properties')) {
+          try {
+          	sh "kubectl delete secret secret-${API_NAME}"
+          } catch (e) {
+            currentBuild.result = "SUCCESS"
+          }          
+          sh "kubectl create secret generic secret-${API_NAME} --from-env-file=secret.properties"
+        }
+        if (fileExists('deployment.yaml')) {
+          try {
+          	sh "kubectl delete -f deployment.yaml"
+          } catch (e) {
+            currentBuild.result = "SUCCESS"
+          }          
+          sh "kubectl apply -f deployment.yaml"
+        }
+      	env.GOOGLE_PROJECT = google_project_vs
+        env.GOOGLE_CLUSTER = google_cluster_vs
+      	sh "gcloud beta container clusters get-credentials ${GOOGLE_CLUSTER} --region ${GOOLE_REGION} --project ${GOOGLE_PROJECT}"
+        sh "gcloud auth activate-service-account --key-file=${GOOGLE_APPLICATION_CREDENTIALS}"        
+        sh "gcloud config set compute/zone ${env.ZONE}"
+        sh "gcloud config set core/project ${GOOGLE_PROJECT}"
+        sh "gcloud config set compute/region ${GOOLE_REGION}"
+        if (fileExists('deployment-vs.yaml')) {
+          try {
+          	sh "kubectl delete -f deployment-vs.yaml"
+          } catch (e) {
+            currentBuild.result = "SUCCESS"
+          }
+          sh "kubectl apply -f deployment-vs.yaml"
+        }
+    }
+}

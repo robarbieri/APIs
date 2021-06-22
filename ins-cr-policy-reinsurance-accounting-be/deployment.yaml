@@ -1,0 +1,94 @@
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: ins-cr-policy-accounting-be
+spec:
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: ins-cr-policy-accounting-be
+    spec:
+      containers:
+        - name: ins-cr-policy-accounting-be
+          image: gcr.io/infra-cross/ins-cr-policy-accounting-be:latest
+          imagePullPolicy: Always
+          ports:
+            - name: http
+              containerPort: 8080
+              protocol: TCP
+          env:
+            - name: DATA_SOURCE_DRIVER
+              valueFrom:
+                configMapKeyRef:
+                  name: env-ins-cr-policy-accounting-be
+                  key: DATA_SOURCE_DRIVER
+            - name: DATA_SOURCE_URL_HDI
+              valueFrom:
+                configMapKeyRef:
+                  name: env-ins-cr-policy-accounting-be
+                  key: DATA_SOURCE_URL_HDI
+            - name: MAX_PARALLEL_THREAD
+              valueFrom:
+                configMapKeyRef:
+                  name: env-ins-cr-policy-accounting-be
+                  key: MAX_PARALLEL_THREAD
+            - name: DATA_SOURCE_USER_NAME_HDI
+              valueFrom:
+                secretKeyRef:
+                  name: secret-ins-cr-policy-accounting-be
+                  key: DATA_SOURCE_USER_NAME_HDI
+            - name: DATA_SOURCE_PASS_WORD_HDI
+              valueFrom:
+                secretKeyRef:
+                  name: secret-ins-cr-policy-accounting-be
+                  key: DATA_SOURCE_PASS_WORD_HDI
+        # Health check do Container
+        #          readinessProbe:
+        #            tcpSocket:
+        #              port: 8080
+        #            initialDelaySeconds: 50
+        #            periodSeconds: 10
+        #          livenessProbe:
+        #            httpGet:
+        #              path: /actuator/health
+        #              port: 8080
+        #            initialDelaySeconds: 50
+        #            periodSeconds: 5
+        # Limite de recursos de Container
+        #          resources:
+        #            limits:
+        #              cpu: "1"
+        #              memory: 1000Mi
+        #            requests:
+        #              cpu: 500m
+        #              memory: 512Mi
+        # sidecar para endpoints
+        - name: ins-cr-policy-accounting-esp
+          image: gcr.io/endpoints-release/endpoints-runtime:1
+          args: [
+            "--http_port", "8081",
+            "--backend", "127.0.0.1:8080",
+            "--service", "api.ins-cr-policy-accounting-be.endpoints.ins-cross-clusters-dev.cloud.goog",
+            "--rollout_strategy", "managed",
+          ]
+          ports:
+            - name: http
+              containerPort: 8081
+              protocol: TCP
+
+---
+#NODE PORT
+apiVersion: v1
+kind: Service
+metadata:
+  name: ins-cr-policy-accounting-np
+spec:
+  ports:
+    - name: http
+      port: 80
+      targetPort: 8081
+      protocol: TCP
+  selector:
+    app: ins-cr-policy-accounting-be
+  type: NodePort

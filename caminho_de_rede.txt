@@ -1,0 +1,4 @@
+[14:31] Mauricio Takashi Matusmura
+    Duas primeiras histórias para o desenvolvimento da API Contábil.
+​[14:31] Mauricio Takashi Matusmura
+    \\hdist02\departamentos\COP\Projeto\Resseguros\User Stories\Pendente Refinamento\INI0023507_Resseguro-Opex\API CIR x Contábil\US006 - Análise_Proc Ress _01-Emissão Pr e QC
