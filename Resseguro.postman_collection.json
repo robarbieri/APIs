@@ -47,7 +47,7 @@
 					}
 				],
 				"url": {
-					"raw": "http://localhost:8080/?key=AIzaSyBGu7Cn_B9UzGfSAYcZXlp2eQsn88GBI9c",
+					"raw": "http://localhost:8080/?key=temp",
 					"protocol": "http",
 					"host": [
 						"localhost"
@@ -59,7 +59,7 @@
 					"query": [
 						{
 							"key": "key",
-							"value": "AIzaSyBGu7Cn_B9UzGfSAYcZXlp2eQsn88GBI9c"
+							"value": "temp"
 						}
 					]
 				}
